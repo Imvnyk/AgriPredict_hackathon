@@ -22,6 +22,13 @@ export const forecastSchema = z
   .length(7)
   .superRefine((days, ctx) => {
     for (let i = 1; i < days.length; i++) {
+      // Refinements can run after a child date has failed validation.
+      // Leave invalid dates to the date schema instead of throwing in toISOString.
+      if (
+        !date.safeParse(days[i - 1].date).success ||
+        !date.safeParse(days[i].date).success
+      )
+        continue;
       const next = new Date(`${days[i - 1].date}T00:00:00Z`);
       next.setUTCDate(next.getUTCDate() + 1);
       if (next.toISOString().slice(0, 10) !== days[i].date)

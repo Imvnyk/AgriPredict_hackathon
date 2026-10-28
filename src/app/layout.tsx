@@ -12,7 +12,9 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "AgriPredict",
+  title: "Agripredict · Your growing companion",
+  description:
+    "A climate-risk companion for Moroccan farmers. Local weather, transparent crop risk screening, and evidence-grounded advice.",
 };
 
 const RootLayout = ({ children }: LayoutProps<"/">) => {
@@ -27,7 +29,7 @@ const RootLayout = ({ children }: LayoutProps<"/">) => {
       )}
     >
       <body className="flex min-h-full flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider forcedTheme="light">{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -63,3 +63,90 @@ test("rejects invalid and discontinuous weather", () => {
     false,
   );
 });
+
+test("malformed calendar dates return validation errors without throwing", () => {
+  for (const invalid of ["invalid", "", "2026-02-30", "2026-13-01"]) {
+    for (const index of [0, 3, 6]) {
+      assert.equal(
+        assessmentInputSchema.safeParse({
+          ...base,
+          forecast: forecast.map((d, i) =>
+            i === index ? { ...d, date: invalid } : d,
+          ),
+        }).success,
+        false,
+      );
+    }
+  }
+});
+
+test("heat screening boundaries and day-count heuristics match the methodology", () => {
+  for (const crop of ["wheat", "tomato"]) {
+    const threshold = crop === "wheat" ? 30 : 35;
+    for (const stage of ["initial", "development", "mid", "late"]) {
+      for (const count of [0, 1, 2, 3, 7]) {
+        const result = assess({
+          ...base,
+          crop,
+          growthStage: stage,
+          forecast: forecast.map((d, i) => ({
+            ...d,
+            temperatureMaxC: i < count ? threshold : threshold - 0.1,
+          })),
+        });
+        assert.equal(result.heat.hotDays.length, count);
+        assert.equal(
+          result.heat.level,
+          count === 0
+            ? "low"
+            : count >= 3 || (stage === "mid" && count >= 2)
+              ? "high"
+              : "moderate",
+        );
+      }
+    }
+  }
+});
+
+test("FAO coefficient approximations and water categories match the documented arithmetic", () => {
+  const coefficients = {
+    wheat: [0.3, 0.725, 1.15, 0.7375],
+    tomato: [0.6, 0.875, 1.15, 0.975],
+  };
+  for (const crop of ["wheat", "tomato"]) {
+    for (const [i, growthStage] of [
+      "initial",
+      "development",
+      "mid",
+      "late",
+    ].entries()) {
+      const result = assess({ ...base, crop, growthStage });
+      assert.equal(result.water.cropCoefficient, coefficients[crop][i]);
+      assert.equal(
+        result.water.estimatedEtcMm,
+        Math.round(28 * coefficients[crop][i] * 100) / 100,
+      );
+    }
+  }
+  for (const waterAvailability of ["adequate", "limited", "unknown"]) {
+    const dry = assess({ ...base, waterAvailability });
+    assert.equal(
+      dry.water.level,
+      waterAvailability === "unknown"
+        ? "unknown"
+        : waterAvailability === "limited"
+          ? "high"
+          : "moderate",
+    );
+    const wet = assess({
+      ...base,
+      waterAvailability,
+      forecast: forecast.map((d) => ({ ...d, rainfallMm: 20 })),
+    });
+    assert.equal(
+      wet.water.level,
+      waterAvailability === "unknown" ? "unknown" : "low",
+    );
+    assert.ok(wet.limitations.some((s) => s.includes("soil storage")));
+  }
+});

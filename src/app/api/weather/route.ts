@@ -16,8 +16,8 @@ const querySchema = z
   })
   .strict();
 export async function GET(request: Request) {
+  const params = new URL(request.url).searchParams;
   try {
-    const params = new URL(request.url).searchParams;
     if (
       [...params.keys()].some((k) => !["latitude", "longitude"].includes(k)) ||
       params.getAll("latitude").length !== 1 ||

@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "node --experimental-transform-types --experimental-test-module-mocks --test tests/*.test.mjs",
     "format": "prettier --write ."
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
+    "@google/genai": "^2.31.0",
     "@phosphor-icons/react": "^2.1.10",
     "@shadcn/react": "^0.3.1",
     "@t3-oss/env-nextjs": "^0.13.11",
@@ -47,6 +49,6 @@
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }

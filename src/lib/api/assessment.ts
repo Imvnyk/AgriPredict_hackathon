@@ -1,10 +1,13 @@
 import type { AssessmentInput } from "./schema";
 
-// Screening temperatures, not universal crop damage thresholds. Sensitivity depends on variety and exposure duration.
+// Source-informed screening points: FAO wheat development guide (30°C) and
+// FAO greenhouse vegetable guide, tomato environmental requirements (35°C).
+// Not universal damage thresholds. Daily maxima cannot establish exposure duration.
+// Risk categories below are explicit product heuristics, not validated probabilities.
 const heatScreenC = { wheat: 30, tomato: 35 } as const;
 // FAO-56 Table 12 standard coefficients. Development and late are midpoint approximations.
 const coefficients = {
-  wheat: { initial: 0.3, development: 0.725, mid: 1.15, late: 0.775 },
+  wheat: { initial: 0.3, development: 0.725, mid: 1.15, late: 0.7375 },
   tomato: { initial: 0.6, development: 0.875, mid: 1.15, late: 0.975 },
 } as const;
 const round = (n: number) => Math.round(n * 100) / 100;
@@ -56,14 +59,15 @@ export function assess(input: AssessmentInput) {
     limitations: [
       "Heat thresholds and risk categories are screening heuristics, not predictions of damage or yield loss; daily maxima do not describe exposure duration.",
       "ETc uses approximate standard FAO crop coefficients without local climate adjustment. Gross rainfall is not effective rainfall; runoff, soil storage and actual irrigation are unknown.",
+      "Generic wheat screening uses a spring-wheat initial Kc; winter wheat and local conditions can differ.",
       "Water availability is self-reported; actual crop water stress requires local soil and crop observations.",
     ],
     sources: [
       "https://www.fao.org/4/x0490e/x0490e0a.htm",
       "https://www.fao.org/4/x0490e/x0490e0b.htm",
       "https://www.fao.org/4/x0490e/x0490e0e.htm",
-      "https://pmc.ncbi.nlm.nih.gov/articles/PMC6754161/",
-      "https://pmc.ncbi.nlm.nih.gov/articles/PMC10014533/",
+      "https://www.fao.org/4/X8234E/x8234e09.htm",
+      "https://www.fao.org/3/i6787e/i6787e.pdf",
     ],
   };
 }
