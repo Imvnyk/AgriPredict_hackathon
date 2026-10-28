@@ -12,7 +12,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Fellah AI",
+  title: "AgriPredict",
 };
 
 const RootLayout = ({ children }: LayoutProps<"/">) => {
